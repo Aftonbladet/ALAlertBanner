@@ -39,7 +39,7 @@
 
 - (void)showAlertBannerInView {
     ALAlertBannerStyle randomStyle = (ALAlertBannerStyle)(arc4random_uniform(4));
-    ALAlertBanner *banner = [ALAlertBanner alertBannerForView:self.view style:randomStyle position:ALAlertBannerPositionTop title:@"Lorem ipsum dolor sit amet, consectetur adipiscing elit." subtitle:[AppDelegate randomLoremIpsum] tappedBlock:^(ALAlertBanner *alertBanner) {
+    ALAlertBanner *banner = [ALAlertBanner alertBannerForView:self.view style:randomStyle position:ALAlertBannerPositionTop title:@"Lorem ipsum dolor sit amet, consectetur adipiscing elit." subtitle:[AppDelegate randomLoremIpsum] image:nil tappedBlock:^(ALAlertBanner *alertBanner) {
         NSLog(@"tapped!");
         [alertBanner hide];
     }];

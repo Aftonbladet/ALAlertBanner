@@ -122,6 +122,8 @@ static CGFloat const kForceHideAnimationDuration = 0.1f;
 @property (nonatomic, strong) UILabel *titleLabel;
 @property (nonatomic, strong) UILabel *subtitleLabel;
 @property (nonatomic, strong) UIImageView *styleImageView;
+@property (nonatomic, strong) UIImageView *contentImageView;
+@property (nonatomic, strong) UIImage *image;
 @property (nonatomic) CGRect parentFrameUponCreation;
 
 @end
@@ -168,6 +170,9 @@ static CGFloat const kForceHideAnimationDuration = 0.1f;
 - (void)setupSubviews {
     _styleImageView = [[UIImageView alloc] init];
     [self addSubview:_styleImageView];
+    
+    _contentImageView = [[UIImageView alloc] init];
+    [self addSubview:_contentImageView];
     
     _titleLabel = [[UILabel alloc] init];
     _titleLabel.backgroundColor = [UIColor clearColor];
@@ -297,15 +302,19 @@ static CGFloat const kForceHideAnimationDuration = 0.1f;
 }
 
 + (ALAlertBanner *)alertBannerForView:(UIView *)view style:(ALAlertBannerStyle)style position:(ALAlertBannerPosition)position title:(NSString *)title {
-    return [self alertBannerForView:view style:style position:position title:title subtitle:nil tappedBlock:nil];
+    return [self alertBannerForView:view style:style position:position title:title subtitle:nil image:nil tappedBlock:nil];
 }
 
 + (ALAlertBanner *)alertBannerForView:(UIView *)view style:(ALAlertBannerStyle)style position:(ALAlertBannerPosition)position title:(NSString *)title subtitle:(NSString *)subtitle {
-    return [self alertBannerForView:view style:style position:position title:title subtitle:subtitle tappedBlock:nil];
+    return [self alertBannerForView:view style:style position:position title:title subtitle:subtitle image:nil tappedBlock:nil];
 }
 
-+ (ALAlertBanner *)alertBannerForView:(UIView *)view style:(ALAlertBannerStyle)style position:(ALAlertBannerPosition)position title:(NSString *)title subtitle:(NSString *)subtitle tappedBlock:(void (^)(ALAlertBanner *alertBanner))tappedBlock {
-    ALAlertBanner *alertBanner = [ALAlertBanner createAlertBannerForView:view style:style position:position title:title subtitle:subtitle];
++ (ALAlertBanner *)alertBannerForView:(UIView *)view style:(ALAlertBannerStyle)style position:(ALAlertBannerPosition)position title:(NSString *)title subtitle:(NSString *)subtitle image:(UIImage * )image {
+    return [self alertBannerForView:view style:style position:position title:title subtitle:subtitle image:image tappedBlock:nil];
+}
+
++ (ALAlertBanner *)alertBannerForView:(UIView *)view style:(ALAlertBannerStyle)style position:(ALAlertBannerPosition)position title:(NSString *)title subtitle:(NSString *)subtitle image:(UIImage *)image tappedBlock:(void (^)(ALAlertBanner *alertBanner))tappedBlock {
+    ALAlertBanner *alertBanner = [ALAlertBanner createAlertBannerForView:view style:style position:position title:title subtitle:subtitle image:image ];
     alertBanner.allowTapToDismiss = tappedBlock ? NO : alertBanner.allowTapToDismiss;
     alertBanner.tappedBlock = tappedBlock;
     return alertBanner;
@@ -314,13 +323,14 @@ static CGFloat const kForceHideAnimationDuration = 0.1f;
 # pragma mark -
 # pragma mark Internal Class Methods
 
-+ (ALAlertBanner *)createAlertBannerForView:(UIView *)view style:(ALAlertBannerStyle)style position:(ALAlertBannerPosition)position title:(NSString *)title subtitle:(NSString *)subtitle {
++ (ALAlertBanner *)createAlertBannerForView:(UIView *)view style:(ALAlertBannerStyle)style position:(ALAlertBannerPosition)position title:(NSString *)title subtitle:(NSString *)subtitle image:(UIImage *)image {
     ALAlertBanner *alertBanner = [[ALAlertBanner alloc] init];
     
     if (![view isKindOfClass:[UIWindow class]] && position == ALAlertBannerPositionUnderNavBar)
         [[NSException exceptionWithName:@"Wrong ALAlertBannerPosition For View Type" reason:@"ALAlertBannerPositionUnderNavBar should only be used if you are presenting the alert banner on the AppDelegate window. Use ALAlertBannerPositionTop or ALAlertBannerPositionBottom for normal UIViews" userInfo:nil] raise];
     
     alertBanner.titleLabel.text = !title ? @" " : title;
+    alertBanner.image = image;
     alertBanner.subtitleLabel.text = subtitle;
     alertBanner.style = style;
     alertBanner.position = position;
@@ -533,7 +543,8 @@ static CGFloat const kForceHideAnimationDuration = 0.1f;
     CGSize maxLabelSize = CGSizeMake(superview.bounds.size.width - (kMargin*3) - self.styleImageView.image.size.width, CGFLOAT_MAX);
     CGFloat titleLabelHeight = AL_SINGLELINE_TEXT_HEIGHT(self.titleLabel.text, self.titleLabel.font);
     CGFloat subtitleLabelHeight = AL_MULTILINE_TEXT_HEIGHT(self.subtitleLabel.text, self.subtitleLabel.font, maxLabelSize, self.subtitleLabel.lineBreakMode);
-    CGFloat heightForSelf = titleLabelHeight + subtitleLabelHeight + (self.subtitleLabel.text == nil || self.titleLabel.text == nil ? kMargin*2 : kMargin*2.5);
+    CGFloat imageHeight = self.image.size.height;
+    CGFloat heightForSelf = imageHeight + titleLabelHeight + subtitleLabelHeight + (self.subtitleLabel.text == nil || self.titleLabel.text == nil ? kMargin*2 : kMargin*2.5);
     
     CGRect frame = CGRectMake(0.f, 0.f, superview.bounds.size.width, heightForSelf);
     CGFloat initialYCoord = 0.f;
@@ -580,7 +591,8 @@ static CGFloat const kForceHideAnimationDuration = 0.1f;
     CGSize maxLabelSize = CGSizeMake(self.superview.bounds.size.width - (kMargin*3.f) - self.styleImageView.image.size.width, CGFLOAT_MAX);
     CGFloat titleLabelHeight = AL_SINGLELINE_TEXT_HEIGHT(self.titleLabel.text, self.titleLabel.font);
     CGFloat subtitleLabelHeight = AL_MULTILINE_TEXT_HEIGHT(self.subtitleLabel.text, self.subtitleLabel.font, maxLabelSize, self.subtitleLabel.lineBreakMode);
-    CGFloat heightForSelf = titleLabelHeight + subtitleLabelHeight + (self.subtitleLabel.text == nil || self.titleLabel.text == nil ? kMargin*2.f : kMargin*2.5f);
+    CGFloat imageHeight = self.image.size.height;
+    CGFloat heightForSelf = imageHeight + titleLabelHeight + subtitleLabelHeight + (self.subtitleLabel.text == nil || self.titleLabel.text == nil ? kMargin*2.f : kMargin*2.5f);
     
     CFTimeInterval boundsAnimationDuration = AL_DEVICE_ANIMATION_DURATION;
         
@@ -605,7 +617,8 @@ static CGFloat const kForceHideAnimationDuration = 0.1f;
     self.styleImageView.frame = CGRectMake(kMargin, (self.frame.size.height/2.f) - (self.styleImageView.image.size.height/2.f), self.styleImageView.image.size.width, self.styleImageView.image.size.height);
     self.titleLabel.frame = CGRectMake(self.styleImageView.frame.origin.x + self.styleImageView.frame.size.width + kMargin, kMargin, maxLabelSize.width, titleLabelHeight);
     self.subtitleLabel.frame = CGRectMake(self.titleLabel.frame.origin.x, self.titleLabel.frame.origin.y + self.titleLabel.frame.size.height + (self.titleLabel.text == nil ? 0.f : kMargin/2.f), maxLabelSize.width, subtitleLabelHeight);
-    
+    self.contentImageView.frame = CGRectMake(0, self.subtitleLabel.frame.origin.y + self.subtitleLabel.frame.size.height, 320., self.image.size.height);
+    self.contentImageView.image = self.image;
     if (animated) {
         [UIView commitAnimations];
     }
@@ -712,7 +725,7 @@ static CGFloat const kForceHideAnimationDuration = 0.1f;
             break;
     }
     
-    NSArray *colorsArray = [NSArray arrayWithObjects:(id)[fillColor CGColor], (id)[[fillColor darkerColor] CGColor], nil];
+    NSArray *colorsArray = [NSArray arrayWithObjects:(id)[fillColor CGColor], (id)[fillColor CGColor], nil];
     CGColorSpaceRef colorSpace =  CGColorSpaceCreateDeviceRGB();
     const CGFloat locations[2] = {0.f, 1.f};
     CGGradientRef gradient = CGGradientCreateWithColors(colorSpace, (__bridge CFArrayRef)colorsArray, locations);
